@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Notificações de Entregas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #25D366;
+            --primary-dark: #128C7E;
+            --secondary: #075E54;
+            --accent: #34B7F1;
+            --bg-light: #f0f2f5;
+            --card-light: #ffffff;
+            --text-light: #1a1a2e;
+            --text-secondary-light: #667085;
+            --border-light: #e4e7ec;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        .dark {
+            --bg-light: #111827;
+            --card-light: #1f2937;
+            --text-light: #f9fafb;
+            --text-secondary-light: #9ca3af;
+            --border-light: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary-dark) 50%, var(--primary) 100%);
+            padding: 30px 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(37, 211, 102, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 i {
+            font-size: 2.5rem;
+            animation: bounce 2s ease infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-card .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-light);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-light);
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .card-header i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .card-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary-light);
+        }
+
+        .form-group label i {
+            color: var(--primary);
+            font-size: 0.85rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-family: inherit;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--bg-light);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 211, 102, 0.15);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Priority Select */
+        .priority-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .priority-option {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .priority-option input {
+            display: none;
+        }
+
+        .priority-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+        }
+
+        .priority-option input:checked+label {
+            border-color: var(--primary);
+            background: rgba(37, 211, 102, 0.1);
+        }
+
+        .priority-option label i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .priority-option.normal label i {
+            color: var(--success);
+        }
+
+        .priority-option.urgent label i {
+            color: var(--warning);
+        }
+
+        .priority-option.express label i {
+            color: var(--danger);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 28px;
+            font-size: 1rem;
+
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-light);
+            border: 2px solid var(--border-light);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            width: 100%;
+            font-size: 1.1rem;
+            padding: 16px;
+        }
+
+        .btn-whatsapp:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        /* Delivery List */
+        .delivery-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .delivery-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .delivery-list::-webkit-scrollbar-track {
+            background: var(--bg-light);
+            border-radius: 3px;
+        }
+
+        .delivery-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .delivery-item {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .delivery-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .delivery-item.urgent {
+            border-left-color: var(--warning);
+        }
+
+        .delivery-item.express {
+            border-left-color: var(--danger);
+        }
+
+        .delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .delivery-date {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary-light);
+        }
+
+        .delivery-priority {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .delivery-priority.normal {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .delivery-priority.urgent {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .delivery-priority.express {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .delivery-client {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .delivery-client i {
+            color: var(--primary);
+        }
+
+        .delivery-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--text-secondary-light);
+        }
+
+        .delivery-detail {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .delivery-detail i {
+            color: var(--primary);
+            width: 16px;
+        }
+
+        .delivery-products {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border-light);
+        }
+
+        .delivery-products strong {
+            color: var(--text-light);
+        }
+
+        .delivery-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 10px;
+        }
+
+        /* Preview Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card-light);
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+        }
+
+        .modal-header h3 i {
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary-light);
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .message-preview {
+            background: #e7ffdb;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-family: inherit;
+            color: #1a1a1a;
+        }
+
+        .dark .message-preview {
+            background: #1f3a2a;
+            color: #e7ffdb;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary-light);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--card-light);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(150%);
+            transition: transform 0.4s ease;
+            z-index: 1001;
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast i {
+            font-size: 1.3rem;
+            color: var(--success);
+        }
+
+        /* Confirmation Modal */
+        .confirm-modal {
+            background: var(--card-light);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .confirm-modal i.warning-icon {
+            font-size: 3rem;
+            color: var(--danger);
+            margin-bottom: 15px;
+        }
+
+        .confirm-modal h3 {
+            margin-bottom: 10px;
+        }
+
+        .confirm-modal p {
+            color: var(--text-secondary-light);
+            margin-bottom: 25px;
+        }
+
+        .confirm-modal .btn-group {
+            justify-content: center;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 16px 14px 45px;
+            font-size: 16px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--bg-light);
+            color: var(--text-light);
+            font-family: inherit;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary-light);
+        }
+
+        /* Phone Input */
+        .phone-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .phone-input select {
+            width: 100px;
+            flex-shrink: 0;
+        }
+
+        .phone-input input {
+            flex: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .modal-footer .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>
+                    <i class="fab fa-whatsapp"></i>
+                    Notificações de Entregas
+                </h1>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="number" id="totalDeliveries">0</div>
+                        <div class="label">Entregas Hoje</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="totalNotifications">0</div>
+                        <div class="label">Notificações</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Form Card -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-plus-circle"></i>
+                    <h2>Nova Entrega</h2>
+                </div>
+
+                <form id="deliveryForm">
+                    <div class="form-grid">
+                        <!-- Cliente -->
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-user"></i> Nome do Cliente</label>
+                            <input type="text" id="clientName" placeholder="Digite o nome do cliente" required>
+                        </div>
+
+                        <!-- Telefone -->
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-phone"></i> WhatsApp do Cliente</label>
+                            <div class="phone-input">
+                                <select id="countryCode">
+                                    <option value="55">🇧🇷 +55</option>
+                                    <option value="1">🇺🇸 +1</option>
+                                    <option value="351">🇵🇹 +351</option>
+                                    <option value="34">🇪🇸 +34</option>
+                                </select>
+                                <input type="tel" id="clientPhone" placeholder="(00) 00000-0000" required>
+                            </div>
+                        </div>
+
+                        <!-- Data e Hora -->
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> Data da Entrega</label>
+                            <input type="date" id="deliveryDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-clock"></i> Hora da Entrega</label>
+                            <input type="time" id="deliveryTime" required>
+                        </div>
+
+                        <!-- Entregador -->
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-id-badge"></i> Nome do Entregador</label>
+                            <input type="text" id="driverName" placeholder="Nome do entregador" required>
+                        </div>
+
+                        <!-- Veículo -->
+                        <div class="form-group">
+                            <label><i class="fas fa-truck"></i> Tipo de Veículo</label>
+                            <select id="vehicleType" required>
+                                <option value="">Selecione...</option>
+                                <option value="Moto">🏍️ Moto</option>
+                                <option value="Carro">🚗 Carro</option>
+                                <option value="Van">🚐 Van</option>
+                                <option value="Caminhão">🚚 Caminhão</option>
+                                <option value="Bicicleta">🚲 Bicicleta</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-palette"></i> Cor do Veículo</label>
+                            <input type="text" id="vehicleColor" placeholder="Ex: Branco, Preto" required>
+                        </div>
+
+                        <!-- Placa -->
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-car-side"></i> Placa do Veículo</label>
+                            <input type="text" id="vehiclePlate" placeholder="ABC-1234"
+                                style="text-transform: uppercase;" required>
+                        </div>
+
+                        <!-- Produtos -->
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-box"></i> Produtos Entregues</label>
+                            <textarea id="products" placeholder="Descreva os produtos entregues..." required></textarea>
+                        </div>
+
+                        <!-- Número do Pedido -->
+                        <div class="form-group">
+                            <label><i class="fas fa-hashtag"></i> Nº do Pedido (Opcional)</label>
+                            <input type="text" id="orderNumber" placeholder="Ex: #12345">
+                        </div>
+
+                        <!-- Valor -->
+                        <div class="form-group">
+                            <label><i class="fas fa-dollar-sign"></i> Valor Total (Opcional)</label>
+                            <input type="text" id="orderValue" placeholder="R$ 0,00">
+                        </div>
+
+                        <!-- Prioridade -->
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-flag"></i> Prioridade da Entrega</label>
+                            <div class="priority-options">
+                                <div class="priority-option normal">
+                                    <input type="radio" name="priority" id="priorityNormal" value="normal" checked>
+                                    <label for="priorityNormal">
+                                        <i class="fas fa-check-circle"></i>
+                                        Normal
+                                    </label>
+                                </div>
+                                <div class="priority-option urgent">
+                                    <input type="radio" name="priority" id="priorityUrgent" value="urgent">
+                                    <label for="priorityUrgent">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        Urgente
+                                    </label>
+                                </div>
+                                <div class="priority-option express">
+                                    <input type="radio" name="priority" id="priorityExpress" value="express">
+                                    <label for="priorityExpress">
+                                        <i class="fas fa-bolt"></i>
+                                        Express
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observações -->
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-sticky-note"></i> Observações (Opcional)</label>
+                            <textarea id="observations" placeholder="Informações adicionais..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Registrar e Notificar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Deliveries List Card -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-list"></i>
+                    <h2>Entregas Recentes</h2>
+                </div>
+
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar por cliente, entregador ou produto...">
+                </div>
+
+                <div class="delivery-list" id="deliveryList">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>Nenhuma entrega registrada</h3>
+                        <p>As entregas registradas aparecerão aqui</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fab fa-whatsapp"></i> Prévia da Mensagem</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="message-preview" id="messagePreview"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="copyMessage()">
+                    <i class="fas fa-copy"></i> Copiar
+                </button>
+                <a href="#" class="btn btn-whatsapp" id="whatsappLink" target="_blank">
+                    <i class="fab fa-whatsapp"></i> Enviar WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="confirm-modal">
+            <i class="fas fa-trash-alt warning-icon"></i>
+            <h3>Excluir Entrega?</h3>
+            <p>Esta ação não pode ser desfeita.</p>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancelar</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Operação realizada com sucesso!</span>
+    </div>
+
+    <script>
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Storage using array (no localStorage available)
+        let deliveries = [];
+        let notificationCount = 0;
+        let deleteTargetId = null;
+
+        // Initialize form with current date/time
+        function initForm() {
+            const now = new Date();
+            document.getElementById('deliveryDate').value = now.toISOString().split('T')[0];
+            document.getElementById('deliveryTime').value = now.toTimeString().slice(0, 5);
+        }
+
+        // Format phone number
+        function formatPhone(phone) {
+            const cleaned = phone.replace(/\D/g, '');
+            if (cleaned.length === 11) {
+                return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+            } else if (cleaned.length === 10) {
+                return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
+            }
+            return phone;
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            const [year, month, day] = dateStr.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        // Generate WhatsApp message
+        function generateMessage(delivery) {
+            const priorityEmoji = {
+                'normal': '✅',
+                'urgent': '⚠️',
+                'express': '⚡'
+            };
+
+            const priorityText = {
+                'normal': 'Normal',
+                'urgent': 'URGENTE',
+                'express': 'EXPRESS'
+            };
+
+            let message = `📦 *NOTIFICAÇÃO DE ENTREGA*\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            message += `Olá *${delivery.clientName}*! 👋\n\n`;
+            message += `Informamos que sua mercadoria foi entregue com sucesso!\n\n`;
+            message += `📋 *DETALHES DA ENTREGA*\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `📅 *Data:* ${formatDate(delivery.date)}\n`;
+            message += `⏰ *Hora:* ${delivery.time}\n`;
+            message += `${priorityEmoji[delivery.priority]} *Prioridade:* ${priorityText[delivery.priority]}\n\n`;
+
+            message += `🚚 *INFORMAÇÕES DO TRANSPORTE*\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `👤 *Entregador:* ${delivery.driverName}\n`;
+            message += `🚗 *Veículo:* ${delivery.vehicleType}\n`;
+            message += `🎨 *Cor:* ${delivery.vehicleColor}\n`;
+            message += `🔖 *Placa:* ${delivery.vehiclePlate.toUpperCase()}\n\n`;
+
+            message += `📦 *ITENS ENTREGUES*\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `${delivery.products}\n\n`;
+
+            if (delivery.orderNumber) {
+                message += `🔢 *Nº Pedido:* ${delivery.orderNumber}\n`;
+            }
+            if (delivery.orderValue) {
+                message += `💰 *Valor Total:* ${delivery.orderValue}\n`;
+            }
+            if (delivery.observations) {
+                message += `\n📝 *Observações:*\n${delivery.observations}\n`;
+            }
+
+            message += `\n━━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `✨ Agradecemos pela preferência!\n`;
+            message += `📞 Em caso de dúvidas, entre em contato.`;
+
+            return message;
+        }
+
+        // Generate WhatsApp link
+        function generateWhatsAppLink(phone, countryCode, message) {
+            const cleanPhone = phone.replace(/\D/g, '');
+            const fullPhone = countryCode + cleanPhone;
+            const encodedMessage = encodeURIComponent(message);
+            return `https://wa.me/${fullPhone}?text=${encodedMessage}`;
+        }
+
+        // Show preview modal
+        function showPreview(delivery) {
+            const message = generateMessage(delivery);
+            document.getElementById('messagePreview').textContent = message;
+
+            const link = generateWhatsAppLink(delivery.phone, delivery.countryCode, message);
+            document.getElementById('whatsappLink').href = link;
+
+            // Store current message for copy function
+            document.getElementById('previewModal').dataset.message = message;
+            document.getElementById('previewModal').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('previewModal').classList.remove('active');
+        }
+
+        // Copy message to clipboard
+        async function copyMessage() {
+            const message = document.getElementById('previewModal').dataset.message;
+            try {
+                await navigator.clipboard.writeText(message);
+                showToast('Mensagem copiada para a área de transferência!');
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = message;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('Mensagem copiada!');
+            }
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Render delivery list
+        function renderDeliveries() {
+            const list = document.getElementById('deliveryList');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = deliveries.filter(d =>
+                d.clientName.toLowerCase().includes(searchTerm) ||
+                d.driverName.toLowerCase().includes(searchTerm) ||
+                d.products.toLowerCase().includes(searchTerm)
+            );
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>${searchTerm ? 'Nenhum resultado encontrado' : 'Nenhuma entrega registrada'}</h3>
+                        <p>${searchTerm ? 'Tente buscar por outro termo' : 'As entregas registradas aparecerão aqui'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filtered.map(d => `
+                <div class="delivery-item ${d.priority}">
+                    <div class="delivery-header">
+                        <div class="delivery-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            ${formatDate(d.date)} às ${d.time}
+                        </div>
+                        <span class="delivery-priority ${d.priority}">
+                            ${d.priority === 'normal' ? '✅ Normal' : d.priority === 'urgent' ? '⚠️ Urgente' : '⚡ Express'}
+                        </span>
+                    </div>
+                    <div class="delivery-client">
+                        <i class="fas fa-user"></i>
+                        ${d.clientName}
+                    </div>
+                    <div class="delivery-details">
+                        <div class="delivery-detail">
+                            <i class="fas fa-phone"></i>
+                            ${formatPhone(d.phone)}
+                        </div>
+                        <div class="delivery-detail">
+                            <i class="fas fa-id-badge"></i>
+                            ${d.driverName}
+                        </div>
+                        <div class="delivery-detail">
+                            <i class="fas fa-truck"></i>
+                            ${d.vehicleType} ${d.vehicleColor}
+                        </div>
+                        <div class="delivery-detail">
+                            <i class="fas fa-car-side"></i>
+                            ${d.vehiclePlate.toUpperCase()}
+                        </div>
+                    </div>
+                    <div class="delivery-products">
+                        <strong>📦 Produtos:</strong> ${d.products}
+                    </div>
+                    <div class="delivery-actions">
+                        <button class="btn btn-sm btn-whatsapp" onclick='showPreview(${JSON.stringify(d).replace(/'/g, "\\'")})'> 
+                            <i class="fab fa-whatsapp"></i> Enviar Novamente
+                        </button>
+                        <button class="btn btn-sm btn-secondary btn-icon" onclick="showConfirmDelete('${d.id}')" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            updateStats();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayDeliveries = deliveries.filter(d => d.date === today).length;
+
+            document.getElementById('totalDeliveries').textContent = todayDeliveries;
+            document.getElementById('totalNotifications').textContent = notificationCount;
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('deliveryForm').reset();
+            initForm();
+        }
+
+        // Show confirm delete modal
+        function showConfirmDelete(id) {
+            deleteTargetId = id;
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        // Close confirm modal
+        function closeConfirmModal() {
+            deleteTargetId = null;
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        // Delete delivery
+        function deleteDelivery() {
+            if (deleteTargetId) {
+                deliveries = deliveries.filter(d => d.id !== deleteTargetId);
+                renderDeliveries();
+                closeConfirmModal();
+                showToast('Entrega excluída com sucesso!');
+            }
+        }
+
+        // Form submission
+        document.getElementById('deliveryForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const delivery = {
+                id: Date.now().toString(),
+                clientName: document.getElementById('clientName').value,
+                phone: document.getElementById('clientPhone').value,
+                countryCode: document.getElementById('countryCode').value,
+                date: document.getElementById('deliveryDate').value,
+                time: document.getElementById('deliveryTime').value,
+                driverName: document.getElementById('driverName').value,
+                vehicleType: document.getElementById('vehicleType').value,
+                vehicleColor: document.getElementById('vehicleColor').value,
+                vehiclePlate: document.getElementById('vehiclePlate').value,
+                products: document.getElementById('products').value,
+                orderNumber: document.getElementById('orderNumber').value,
+                orderValue: document.getElementById('orderValue').value,
+                priority: document.querySelector('input[name="priority"]:checked').value,
+                observations: document.getElementById('observations').value
+            };
+            deliveries.unshift(delivery);
+            notificationCount++;
+            renderDeliveries();
+            showPreview(delivery);
+            clearForm();
+            showToast('Entrega registrada com sucesso!');
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', renderDeliveries);
+
+        // Confirm delete button
+        document.getElementById('confirmDeleteBtn').addEventListener('click', deleteDelivery);
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function (e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Initialize
+        initForm();
+        renderDeliveries();
+    </script>
+</body>
+
+</html>
